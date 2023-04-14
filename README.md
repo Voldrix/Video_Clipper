@@ -40,6 +40,7 @@ __TODO__
 - scrub bar progress meter missing in WebKit
 - scrub bar thumb incorrect in WebKit
 - enable clips from multiple source videos
+- detect framerate
 
 __License__\
 [MIT License](!LICENSE)
