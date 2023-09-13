@@ -288,10 +288,10 @@ function render() {
   var count = 1;
   var msg = "ffmpeg -i \"" + filename + "\"";
   for(let x of allClips) {
-    msg += ` <br>-ss ${x.getAttribute('start')} -to ${x.getAttribute('end')} -sn -an -c copy -y zzz${count}.mp4`;
+    let paddedCount = (count < 10) ? '0' + count : count;
+    msg += ` <br>-ss ${x.getAttribute('start')} -to ${x.getAttribute('end')} -sn -an -c copy -y zzz${paddedCount}.mp4`;
     count++;
   }
-  //todo Clips render out of order if more than 9
   msg += ";<br><br>ffmpeg -f concat -safe 0 -i <(for f in \"$PWD\"/zzz*.mp4; do echo \"file '$f'\"; done) <br>-c copy \"" + filename + ".mp4\";<br>rm -f zzz*mp4";
 
   document.getElementById('renderedText').innerHTML = msg;
