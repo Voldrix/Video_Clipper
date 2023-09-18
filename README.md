@@ -41,7 +41,6 @@ __TODO__
 - scrub bar thumb incorrect in WebKit
 - enable clips from multiple source videos
 - detect framerate
-- Key commands sometimes activate buttons if previously clicked
 
 __License__\
 [MIT License](!LICENSE)
