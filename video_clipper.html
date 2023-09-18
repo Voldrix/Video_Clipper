@@ -89,6 +89,7 @@ button:hover {box-shadow:-2px -2px 2px 0 #000,2px 2px 2px 0 #333;}
   <div class=timecodes>
     <input type=text id=in size=10 oninput=adjustCutPoint('in') placeholder="0:0:0.000" />
     <div id=timecode></div>
+    <div id=vidduration></div>
     <input type=text id=out size=10 oninput=adjustCutPoint('out') placeholder="0:0:0.000" />
   </div>
   <input type=range class=seek id=seek min=0 max=100 value=0 step=0.1 oninput=scrub('coarse')>
@@ -146,11 +147,19 @@ function loadVid(file) {
   clips.innerHTML = '';
   dur.setAttribute('seconds', 0);
   dur.innerText = '';
+  seekFine.value = seekBar.value = 0;
+  seekBar.style.background = 'none';
+  document.getElementById('in').value = '';
+  document.getElementById('out').value = '';
+  document.getElementById('vidduration').innerText = '';
   vid.load();
 }
 
 function loadedMetadata() {
+  intime = 0;
   seekBar.max = outtime = vid.duration;
+  timecode.innerText = '00:00.000';
+  document.getElementById('vidduration').innerText = formatTime(outtime);
   frameTime = 0.02; //todo get framerate
 }
 
@@ -192,9 +201,20 @@ function seek(seekTime,relative) {
 function setCutPoint(inOrOut,timeCode) {
   var t = (timeCode === undefined) ? vid.currentTime : timeCode;
   if(timeCode === undefined) document.getElementById(inOrOut).value = formatTime(t);
-  if(inOrOut === 'in') intime = t;
-  else outtime = t;
-
+  if(inOrOut === 'in') { //set in point
+    intime = t;
+    if(intime >= outtime) {
+      outtime = vid.duration;
+      document.getElementById('out').value = '';
+    }
+  }
+  else { //set out point
+    outtime = t;
+    if(outtime <= intime) {
+      intime = 0;
+      document.getElementById('in').value = '';
+    }
+  }
   var pixL = 100 * intime / vid.duration;
   var pixR = 100 * outtime / vid.duration;
   var grad = `linear-gradient(to right,var(--prime-color) 0% ${pixL}%, #0000 ${pixL}% ${pixR}%, var(--prime-color) ${pixR}% 100%)`;
@@ -219,8 +239,12 @@ function adjustCutPoint(inOrOut) {
 
 function loadClip(c) {
   vid.pause();
-  setCutPoint('in',parseFloat(c.parentNode.getAttribute('start')));
-  setCutPoint('out',parseFloat(c.parentNode.getAttribute('end')));
+  var starttime = parseFloat(c.parentNode.getAttribute('start'));
+  var endtime = parseFloat(c.parentNode.getAttribute('end'));
+  setCutPoint('in',starttime);
+  setCutPoint('out',endtime);
+  document.getElementById('in').value = formatTime(starttime);
+  document.getElementById('out').value = formatTime(endtime);
   seek(parseFloat(c.parentNode.getAttribute('start')));
 }
 
@@ -292,6 +316,7 @@ function render() {
     msg += ` <br>-ss ${x.getAttribute('start')} -to ${x.getAttribute('end')} -sn -an -c copy -y zzz${paddedCount}.mp4`;
     count++;
   }
+  //todo Clips render out of order if more than 9
   msg += ";<br><br>ffmpeg -f concat -safe 0 -i <(for f in \"$PWD\"/zzz*.mp4; do echo \"file '$f'\"; done) <br>-c copy \"" + filename + ".mp4\";<br>rm -f zzz*mp4";
 
   document.getElementById('renderedText').innerHTML = msg;
@@ -302,6 +327,7 @@ function fileDropHandler(e) {
   e.preventDefault();
   e.stopPropagation();
   e.target.classList.remove('dragover');
+  document.title = e.dataTransfer.files[0].name;
   loadVid(e.dataTransfer.files[0]);
 }
 
@@ -353,7 +379,7 @@ vid.addEventListener('timeupdate', timeUpdate); //Time Updated
 document.addEventListener('keydown',event => {
   if(event.repeat || clipout === document.activeElement || clipin === document.activeElement) return;
   switch(event.key) {
-    case ' ': playPause();break;
+    case ' ': event.preventDefault();playPause();break;
     case 'ArrowLeft': seek(-10,1);break;
     case 'ArrowRight': seek(10,1);break;
     case '[': seek(-1,1);break;
