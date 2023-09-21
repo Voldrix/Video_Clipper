@@ -22,6 +22,8 @@ To start a new video, drag and drop it over top the current video. This will cle
 - `R` Render FFmpeg code to generate highlight reel
 - `Right Arrow` Seek +10s
 - `Left Arrow` Seek -10s
+- `CTRL` + `Right Arrow` Seek +60s
+- `CTRL` + `Left Arrow` Seek -60s
 - `]` Seek +1s
 - `[` Seek -1s
 - `>` Seek +1 frame

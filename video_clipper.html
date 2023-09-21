@@ -379,8 +379,8 @@ document.addEventListener('keydown',event => {
   if(event.repeat || clipout === document.activeElement || clipin === document.activeElement) return;
   switch(event.key) {
     case ' ': event.preventDefault();playPause();break;
-    case 'ArrowLeft': seek(-10,1);break;
-    case 'ArrowRight': seek(10,1);break;
+    case 'ArrowLeft': seek(-10-(50*event.ctrlKey),1);break;
+    case 'ArrowRight': seek(10+(50*event.ctrlKey),1);break;
     case '[': seek(-1,1);break;
     case ']': seek(1,1);break;
     case '<': seek(-frameTime,1);break;
